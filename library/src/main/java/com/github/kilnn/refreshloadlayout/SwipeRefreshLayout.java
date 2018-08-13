@@ -1,4 +1,4 @@
-package com.github.kilnn.refreshloadlayout;//package com.kilnn.widget.refreshload;
+//package com.github.kilnn.refreshloadlayout;//package com.kilnn.widget.refreshload;
 //
 //import android.annotation.SuppressLint;
 //import android.content.Context;
