@@ -724,6 +724,10 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
         mRefreshAnimation.setInterpolator(getAnimationInterpolator(mRefreshAnimationType));
         mRefreshAnimation.setAnimationListener(mRefreshAnimationListener);
         clearAnimation();
+        //如果是调用方法刷新，而不是由下拉手势刷新，那么mRefreshView之前都是GONE状态，所以setVisibility(View.VISIBLE);
+        if (type != TYPE_NONE && mRefreshView.getVisibility() != View.VISIBLE) {
+            mRefreshView.setVisibility(View.VISIBLE);
+        }
         startAnimation(mRefreshAnimation);
     }
 
