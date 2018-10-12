@@ -3,6 +3,7 @@ package com.github.kilnn.refreshloadlayout.sample;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.github.kilnn.refreshloadlayout.RefreshLoadLayout;
 
@@ -10,6 +11,7 @@ import com.github.kilnn.refreshloadlayout.RefreshLoadLayout;
 public class MainActivity extends AppCompatActivity {
 
     private RefreshLoadLayout mRefreshLoadLayout;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,23 +28,29 @@ public class MainActivity extends AppCompatActivity {
 
         mRefreshLoadLayout.setOnRefreshListener(new RefreshLoadLayout.OnRefreshListener() {
             @Override
-            public void onRefresh() {
-                new Handler().postDelayed(new Runnable() {
+            public void onRefresh(boolean triggerByDrag) {
+                Log.e("Kilnn", "triggerByDrag:" + triggerByDrag);
+                mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mRefreshLoadLayout.setRefreshing(false);
+//                        mRefreshLoadLayout.setRefreshing(false);
+                        mRefreshLoadLayout.setRefreshingCompleted(true, 1000);
+                        mRefreshLoadLayout.setRefreshing(true);
                     }
                 }, 5000);
 
             }
         });
 
-        new Handler().postDelayed(new Runnable() {
+        //启动后3秒自动刷新
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mRefreshLoadLayout.setRefreshing(true);
             }
         }, 3000);
+
+
     }
 
 }

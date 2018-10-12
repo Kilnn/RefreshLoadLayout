@@ -48,11 +48,11 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
             android.R.attr.enabled
     };
 
-    public static final int TYPE_NONE = 0;
-    public static final int TYPE_CANCEL = 1;
-    public static final int TYPE_PASSIVE = 2;
-    public static final int TYPE_ACTIVE = 3;
-    public static final int TYPE_RESET = 4;
+    public static final int TYPE_NONE = 0;//初始值
+    public static final int TYPE_CANCEL = 1;//取消事件
+    public static final int TYPE_PASSIVE = 2;//被动刷新时间，指下拉触发刷新
+    public static final int TYPE_ACTIVE = 3;//主动刷新事件，指调用setRefreshing方法触发刷新
+    public static final int TYPE_RESET = 4;//重置事件
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_NONE, TYPE_CANCEL, TYPE_PASSIVE, TYPE_ACTIVE, TYPE_RESET})
@@ -227,6 +227,12 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
     }
 
     private void setRefreshing(boolean refreshing, boolean active) {
+        //刷新，但是因为之前有个PostedCompletedRunnable延迟，之前的mRefreshing状态还没改变过来
+        if (refreshing && mRefreshing && mHasPostedCompletedRunnable) {
+            //强制停止刷新
+            removeCallbacks(mCompletedRunnable);
+            mCompletedRunnable.run();
+        }
         if (mRefreshing == refreshing) return;
         mRefreshing = refreshing;
         if (mRefreshing) {
@@ -239,6 +245,8 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
             refreshAnimate(TYPE_RESET);
         }
     }
+
+    private boolean mHasPostedCompletedRunnable;
 
     /**
      * @param success
@@ -254,15 +262,19 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
             mRefreshing = false;
             refreshAnimate(TYPE_RESET);
         } else {
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mRefreshing = false;
-                    refreshAnimate(TYPE_RESET);
-                }
-            }, delay);
+            mHasPostedCompletedRunnable = true;
+            postDelayed(mCompletedRunnable, delay);
         }
     }
+
+    private Runnable mCompletedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mRefreshing = false;
+            refreshAnimate(TYPE_RESET);
+            mHasPostedCompletedRunnable = false;
+        }
+    };
 
     @Override
     public void setEnabled(boolean enabled) {
@@ -688,7 +700,7 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
     private void notifyRefreshOrReset() {
         if (mRefreshing) {
             if (mListener != null) {
-                mListener.onRefresh();
+                mListener.onRefresh(mRefreshAnimationType == TYPE_PASSIVE);
             }
             mTargetViewDelegate.onRefresh();
             if (mRefreshView != null) {
@@ -835,8 +847,10 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
     public interface OnRefreshListener {
         /**
          * Called when a swipe gesture triggers a refresh.
+         *
+         * @param triggerByDrag 是否是由下拉触发的刷新
          */
-        void onRefresh();
+        void onRefresh(boolean triggerByDrag);
     }
 
     /**

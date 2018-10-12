@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -83,7 +84,7 @@ public class ProgressRefreshView extends NormalRefreshView {
 
     @Override
     public void onRefresh() {
-
+        Log.e("Kilnn", "正在刷新，请更新UI");
     }
 
     @Override
