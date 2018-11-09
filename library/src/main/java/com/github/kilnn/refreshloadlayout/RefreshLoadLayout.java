@@ -713,6 +713,7 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
     }
 
     private void reset() {
+        mRefreshAnimation.setAnimationListener(null);
         mRefreshAnimation.reset();
         mRefreshAnimation.cancel();
         clearAnimation();
@@ -728,6 +729,7 @@ public class RefreshLoadLayout extends ViewGroup implements NestedScrollingParen
         //reset at first,  so the mListenerHandler in Animation can be null.
         //And when you call cancel(), the previous animation can get onAnimationEnd() callback before
         //we change the mRefreshAnimationType.
+        mRefreshAnimation.setAnimationListener(null);
         mRefreshAnimation.reset();
         mRefreshAnimation.cancel();
 
